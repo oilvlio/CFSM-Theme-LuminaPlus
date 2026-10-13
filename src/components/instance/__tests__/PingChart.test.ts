@@ -1,5 +1,9 @@
 import { describe, expect, it } from "vitest";
-import { summarizePingRecords } from "@/components/instance/PingChart";
+import {
+  isPingTaskVisible,
+  summarizePingRecords,
+  togglePingTaskSelection,
+} from "@/components/instance/PingChart";
 import type { PingRecord } from "@/types/cfsm";
 
 function record(
@@ -30,5 +34,29 @@ describe("summarizePingRecords", () => {
     expect(summary.avg).toBeCloseTo(200 / 11, 8);
     expect(summary.p99).toBeCloseTo(91, 8);
     expect(summary.loss).toBeCloseTo((6 / 17) * 100, 8);
+  });
+});
+
+describe("ping task selection", () => {
+  it("adds and removes selected curves while an empty selection shows all", () => {
+    let selected = new Set<number>();
+
+    selected = togglePingTaskSelection(selected, 1);
+    expect([...selected]).toEqual([1]);
+    expect(isPingTaskVisible(selected, 1)).toBe(true);
+    expect(isPingTaskVisible(selected, 2)).toBe(false);
+
+    selected = togglePingTaskSelection(selected, 2);
+    expect([...selected]).toEqual([1, 2]);
+
+    selected = togglePingTaskSelection(selected, 1);
+    expect([...selected]).toEqual([2]);
+    expect(isPingTaskVisible(selected, 1)).toBe(false);
+    expect(isPingTaskVisible(selected, 2)).toBe(true);
+
+    selected = togglePingTaskSelection(selected, 2);
+    expect(selected.size).toBe(0);
+    expect(isPingTaskVisible(selected, 1)).toBe(true);
+    expect(isPingTaskVisible(selected, 2)).toBe(true);
   });
 });
